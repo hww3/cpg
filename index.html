@@ -1,0 +1,105 @@
+<title>Caudium Programmer's Guide</title>
+<ol>
+<li>Caudium Internal Architecture
+MODULES
+security
+trust level
+calling order
+PROTOCOLS
+where do they fit in?
+PRIVELEDGES (Privs.privs())??? maybe this should go someplace else 
+Cacheing
+Threading
+Databases
+
+<li><a href="request_id.html">The Request Information  object</a>
+id->auth
+id->client
+id->clientprot
+id->conf
+id->cookies
+id->method
+id->misc
+accept
+accept-encoding
+accept-language
+connection
+host
+id->not_query
+id->pragma
+id->prestate
+id->query
+id->realfile
+id->referer
+id->remoteaddr
+id->request_headers
+id->supports
+id->useragent
+id->variables
+
+using request_id to store data
+
+<li>caudiumlib and http functions
+add_pre_state
+cern_http_date
+http_auth_required
+http_caudium_config_cookie
+http_caudium_id_cookie
+http_date
+http_encode_cookie
+http_encode_string
+http_encode_url
+http_file_answer
+http_low_answer
+http_pipe_in_progress
+http_proxy_auth_required
+http_redirect
+http_res_to_string
+http_rxml_answer
+http_stream
+http_string_answer
+
+<li>Modules
+a. Types
+MODULE_EXTENSION
+MODULE_LOCATION
+MODULE_URL
+MODULE_FILE_EXTENSION
+MODULE_PARSER
+MODULE_LAST
+MODULE_FIRST
+MODULE_AUTH
+MODULE_MAIN_PARSER
+MODULE_TYPES
+MODULE_DIRECTORIES
+MODULE_PROXY
+MODULE_LOGGER
+MODULE_FILTER
+MODULE_PRECACHE
+MODULE_PROVIDER
+MODULE_PROTOCOL
+MODULE_SECURITY
+MODULE_EXPERIMENTAL
+
+<li>Compound modules ( parser and url, etc)
+
+B,C and D should be discussed for each MODULE_TYPE.
+b. Requirements
+c. Callbacks
+d. Examples 
+e. Modules that are in the Caudium Distribution
+(many need good documentation to be usable)
+<li>Scripts
+pikescript.pike
+??? can caudium do java?
+<li><A href="cgi.html">Using the Common Gateway Interface (CGI)</a>
+known issues and workarounds
+cgi.pike
+<li><a Href="uniscript.html">Universal Scripting (Uniscript)</a>
+<li>Using the Caudium Cache
+<li>Protocol modules
+
+http
+http2
+ftp
+</ol>

@@ -1,0 +1,105 @@
+<title>Request information object</title>
+<h1>Request information object</h1
+
+<p>The request information object (often identified as <tt>request_id</tt> or simply <tt>id</tt>) represents the request being processed by the Caudium server. The request object contains not only information about the request, but also the server environ
+ment as well.
+Since the request information object is sent to every module and callback method
+involved in handling the request it is a perfect place for
+intra-module communication.
+
+<p>Note that there are actually different request information objects
+for different protocols. To the programmer they try to look the same,
+but some slight differences might show up.
+
+<h2>Contents</h2>
+<p>The members of the request information object are:
+
+<dl>
+<dt><b>conf</b><dd>
+virtual server configuration object. This field is not necessarily
+available when running ordinary Pike scripts.
+
+<p>
+<dt><b>variables</b><dd>
+a mapping containing all form variables sent in the request, as well
+as any additional variables created by modules or RXML tags.
+
+<p>
+<dt><b>supports</b><dd>
+a multiset containing the features the current browser supports. See
+the <a href="../../creator/supports/index.html">supports chapter</a> in the
+creator manual for more information.
+
+<p>
+<dt><b>pragma</b><dd>
+contains a multiset with information sent by the HTTP header Pragma.
+<i>no-cache</i> is a important value, since that mean that the request
+should be fetched without caching.
+
+<p>
+<dt><b>misc</b><dd>
+a mapping available to store miscellaneous information. Usually used
+for intra-module communication or communication between different tags
+in the same module. Beware that the name space of this mapping is
+getting very cluttered, take care to choose names that will likely
+remain unique before storing things here.
+
+<p>
+<dt><b>raw</b><dd>
+a string containing the the entire raw client request.
+
+<p>
+<dt><b>query</b><dd>
+a string containing the query part of the URL. It is usually easier to
+get information from the <i>variables</i> mapping.
+
+<p>
+<dt><b>not_query</b><dd>
+a string containing the path part of the URL.
+
+<p>
+<dt><b>raw_url</b><dd>
+a string containing the whole URL. Note that usually the URL as seen
+by the web server does only contain the path and query part. Full URLs
+are only used for proxy requests.
+
+<p>
+<dt><b>auth</b><dd>
+an array containing authentification information. If an
+authentification module is present it will contain an array of the
+format; <tt>({ successp, username, password })</tt> where successp is
+one if the user succeeded in authentificating and zero otherwise. The
+password will not be available if the user succeeded in
+authentificating herself.
+
+<p>If there are no authentification module present <i>auth</i> will
+contain an array of the format; <tt>({ "Basic", basic_auth_info
+})</tt> where basic auth info contains a string with the user name and
+password, separated by colon.
+
+<p>
+<dt><b>remoteaddr</b><dd>a string containing the numeric IP address of the client machine.
+
+<p>
+<dt><b>clientprot</b><dd>
+a string containing the protocol version used by the client when
+issuing the request.
+
+<p>
+<dt><b>method</b><dd>
+a string containing the access method specified by the client. This is
+usually GET, or sometimes POST when forms are being used. It can also
+have other values if you allow methods like PUT, user ftp or use
+special protocols such as WebDAV, may try to use various other methods
+as well.
+
+<p>
+<dt><b>request_headers</b><dd>
+a mapping containing the HTTP headers that the client submitted when
+issuing the request.
+
+<p>
+<dt><b>my_fd</b><dd>
+is a Stdio.File object containing the actual network connection to the
+browser.
+</dl>

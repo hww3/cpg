@@ -1,0 +1,200 @@
+<title>CGI</title>
+<h1>CGI: Common Gateway Interface</h1>
+
+<h2>Introduction</h2>
+Caudium supports version 1.1 of the CGI (Common Gateway Interface) 
+specification through the CGI support module. Caudium's behavior may vary
+slightly from that of other web servers; these differences are described 
+in the <i>Implimentation Notes</i> section located below.
+
+	<p>A CGI script is a program or script that is executed once for each
+request for it. The CGI script is either identified by file extension,
+for example <tt>.cgi</tt>, or by residing in a certain directory, for
+example <tt>/cgi-bin/</tt>. A request to a CGI script will be handled
+by finding the script and starting it with information about the
+request sent as environment variables and on stdin. The script returns
+data by writing it to stdout. Various settings affect the behavior of the 
+CGI support in Caudium. Please see the Administrator's guide for more details
+about the CGI support module.
+
+<p>The CGI script needs to be an executable file on the operating
+system. On Unix based systems, this is either a program, or a script 
+that begins with <tt>#!</tt> followed by the name of the interpreter. CGI 
+scripts need to be executable by the user that Caudium is running as.
+<p>
+The CGI handler module returns data from the CGI application as data is 
+generated, rather than after the CGI program returns, which is the default 
+behavior when using Pike scripts. Additionally, the CGI script module may 
+be configured to parse the output of a CGI program for RXML markup. This 
+option is set in the Configuration Interface.
+<p>
+<p><a name="Environment Variables">
+<h2>Environment Variables</h2>
+<br>
+When invoking CGI scripts, Caudium passes a number of environment
+variables to the script. These environment variables contain data related to
+the request object causing the CGI to be executed.
+
+<dl>
+<dt><b>AUTH_TYPE</b><dd>
+contains the authentication type in use. The most common value is
+"Basic".
+
+
+<dt><b>COOKIES</b><dd>
+lists all cookie names associated with this request.
+
+<p>
+<dt><b>COOKIE_<i>name</i></b><dd>
+contains the value of the cookie <i>name</i>.
+
+<p>
+<dt><b>DOCUMENT_NAME</b><dd>
+contains the name of the CGI script.
+
+<p>
+<dt><b>DOCUMENT_URI</b><dd>
+contains the path part or the URL to the CGI script.
+
+<p>
+<dt><b>GATEWAY_INTERFACE</b><dd>
+contains the version of the CGI protocol used, which will be CGI/1.1
+for the 1.2 version of Caudium.
+
+<p>
+<dt><b>HTTP_ACCEPT</b><dd>
+contains the contents of the accept header of HTTP.
+
+<p>
+<dt><b>HTTP_ACCEPT_CHARSET</b><dd>
+contains the contents of the accept-charset header of HTTP.
+
+<p>
+<dt><b>HTTP_ACCEPT_ENCODING</b><dd>
+contains the contents of the accept-encoding header of HTTP.
+
+<p>
+<dt><b>HTTP_ACCEPT_LANGUAGE</b><dd>
+contains the contents of the accept-language header of HTTP.
+
+<p>
+<dt><b>HTTP_AUTHORIZATION</b><dd>
+contains the contents of the auth header of HTTP. It will only be
+available if the <i>Raw user info</i> variable has been set to
+<i>Yes</i> in the Configuration Interface.
+
+<p>
+<dt><b>HTTP_USER_AGENT</b><dd>
+contains the name of the browser used.
+
+<p>
+<dt><b>INDEX</b><dd>
+contains the query part of the URL, ie the part before the ? in the URL.
+
+<p>
+<dt><b>QUERY_STRING</b><dd>
+contains the query part of the URL.
+
+<p>
+<dt><b>QUERY_<i>name</i></b><dd>
+contains the value of the form variable <i>name</i>.
+
+<p>
+<dt><b>REMOTE_ADDR</b><dd>
+contains the IP number of the client machine.
+
+<p>
+<dt><b>REMOTE_HOST</b><dd>
+contains the domain name of the client machine, if Caudium has had
+time to find it. Since it takes some time to find what domain name a
+computer has this information will not be available the first time a
+certain computer connects to the server.
+
+<p>
+<dt><b>REMOTE_PORT</b><dd>
+contains the port number used by the client.
+
+<p>
+<dt><b>REMOTE_USER</b><dd>
+the login name used by the user.
+
+<p>
+<dt><b>REMOTE_PASSWORD</b><dd>
+the password used by the user, only available if the <i>Send decoded
+password</i> variable is set to <i>Yes</i> in the Configuration Interface.
+
+<p>
+<dt><b>REQUEST_METHOD</b><dd>
+contains the method given in the HTTP request.  In most cases, this
+will probably be GET or POST, but other HTTP methods, like PUT, are
+also possible. When using special protocols, such as WebDAV, other
+request methods may also occur.
+
+<p>
+<dt><b>SCRIPT_FILENAME</b><dd>
+contains the complete path in the file system to the CGI script.
+
+<p>
+<dt><b>SCRIPT_NAME</b><dd>
+contains the path part in the URL.
+
+<p>
+<dt><b>SERVER_NAME</b><dd>
+contains the domain name of the web server.
+
+<p>
+<dt><b>SERVER_PORT</b><dd>
+contains the port number of the web servers. The default is 80 for
+HTTP or 443 for HTTPS, but it can be almost any value. If the server
+has seveal ports this variable will contain the port used to access
+the script.
+
+<p>
+<dt><b>SERVER_PROTOCOL</b><dd>
+contains the protocol used.
+
+<p>
+<dt><b>SERVER_SOFTWARE</b><dd>
+contains the version information of the web server.
+
+<p>
+<dt><b>SERVER_URL</b><dd>
+contains the URL to the web server. Together with SCRIPT_NAME, this
+makes up the URL for the script.
+
+<p>
+<dt><b>SUPPORTS</b><dd>
+contains a list of words, separated with spaces, of all features for
+which support information is available. See the supports chapter in the 
+User manual for more information.
+
+<p>
+<dt><b>SUPPORTS_<i>feature</i></b><dd>
+contains the value <i>true</i> if that feature is supported by the
+current browser. See the supports chapter in the User manual for
+more information.
+
+<p>
+<dt><b>VARIABLES</b><dd>
+contains a list of all form variables.
+
+<p>
+<dt><b>VAR_<i>name</i></b><dd>
+contains the value of the form variable <i>name</i>.
+</dl>
+
+<h2>Implimentation Notes</h2>
+Caudium impliments the NCSA CGI/1.1 specification. CGI programs that
+do not employ extensions to this specification should function properly 
+when used with Caudium.
+
+<h2>Examples</h2>
+
+This section should contain simple examples of CGIs, probably in shell, 
+perl or pike. Perhaps we should mention how to set PHP up as a CGI(?)
+
+<h2>References</h2>
+
+<a href="http://hoohoo.ncsa.uiuc.edu/cgi/interface.html">CGI/1.1 Specification Webpage</a>
+<p>
+CGI Development Tools (toolkits, perl modules, etc?)
