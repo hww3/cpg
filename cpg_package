@@ -3,7 +3,11 @@
 bgcolor="#dddddd" width=15%><b>NOTE</b></td><td 
 bgcolor="#dddddd"><contents></td></tr></table>
 </define>
-
+<define container="fixme">
+<table cellpadding=10 width=100%><tr width=100%><td 
+bgcolor="yellow" width=15%><b>FIXME!</b></td><td 
+bgcolor="#dddddd"><contents></td></tr></table>
+</define>
 <define container="warning">
 <table cellpadding=10 width=100%><tr width=100%><td 
 bgcolor="red" width=15%><b>WARNING</b></td><td 

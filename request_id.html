@@ -65,19 +65,18 @@ by the web server does only contain the path and query part. Full URLs
 are only used for proxy requests.
 
 <p>
-<dt><b>auth</b><dd>
-an array containing authentification information. If an
-authentification module is present it will contain an array of the
-format; <tt>({ successp, username, password })</tt> where successp is
-one if the user succeeded in authentificating and zero otherwise. The
-password will not be available if the user succeeded in
-authentificating herself.
-
-<p>If there are no authentification module present <i>auth</i> will
-contain an array of the format; <tt>({ "Basic", basic_auth_info
-})</tt> where basic auth info contains a string with the user name and
-password, separated by colon.
-
+<dt><b>user</b><dd>
+An integer or mapping used to indicate the current state of authorization 
+by a user. If a user successfully authenticates themself, this element 
+will contain a mapping describing the user, as returned by 
+auth_module->user_info() (see the section <xa href="auth">Authorization 
+and Naming</xa> for details.) If the user has not attempted 
+authentication, or if the authentication information is invalid, this 
+element will be zero (0).
+<p>
+<dt><b>rawauth</b><dd>
+if a user has attempted HTTP authentication, this element will contain the 
+raw authorization header, otherwise, this element will not exist.
 <p>
 <dt><b>remoteaddr</b><dd>
 a string containing the numeric IP address of the client machine.
