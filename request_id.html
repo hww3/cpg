@@ -1,13 +1,15 @@
 <title>Request information object</title>
-<h1>Request information object</h1
+<h1>Request information object</h1>
 
-<p>The request information object (often identified as <tt>request_id</tt> or simply <tt>id</tt>) represents the request being processed by the Caudium server. The request object contains not only information about the request, but also the server environ
-ment as well.
-Since the request information object is sent to every module and callback method
-involved in handling the request it is a perfect place for
-intra-module communication.
+<p>The request information object (often identified as <tt>request_id</tt> 
+or simply <tt>id</tt>) represents the request being processed by the Caudium 
+server. The request object contains not only information about the request, 
+but also the server environment as well. Since the request information 
+object is sent to every module and callback method involved in handling 
+the request it is a perfect place for intra-module communication.
 
-<p>Note that there are actually different request information objects
+<p>
+Note that there are actually different request information objects
 for different protocols. To the programmer they try to look the same,
 but some slight differences might show up.
 
@@ -27,8 +29,7 @@ as any additional variables created by modules or RXML tags.
 <p>
 <dt><b>supports</b><dd>
 a multiset containing the features the current browser supports. See
-the <a href="../../creator/supports/index.html">supports chapter</a> in the
-creator manual for more information.
+the supports chapter in the creator manual for more information.
 
 <p>
 <dt><b>pragma</b><dd>
@@ -78,8 +79,8 @@ contain an array of the format; <tt>({ "Basic", basic_auth_info
 password, separated by colon.
 
 <p>
-<dt><b>remoteaddr</b><dd>a string containing the numeric IP address of the client machine.
-
+<dt><b>remoteaddr</b><dd>
+a string containing the numeric IP address of the client machine.
 <p>
 <dt><b>clientprot</b><dd>
 a string containing the protocol version used by the client when
@@ -103,3 +104,62 @@ issuing the request.
 is a Stdio.File object containing the actual network connection to the
 browser.
 </dl>
+
+<h2>Using request_id for Data Storage</h2>
+The request information object is passed as an argument to all module 
+callbacks, as well as to all pike scripts and code within the pike tag 
+module. Because of this, request_id is an ideal method for inter-module 
+communication. Storing information within <tt>request_id</tt> makes that 
+information available to all subsequent modules and tags within an 
+individual request. 
+<p>
+
+<note>
+Data that must be shared between requests must use other data 
+storage methods, such as the Caudium Cache, or one of the Session handling 
+modules.
+</note>
+
+The recommended location for storing data for intrarequest communication 
+is within the mapping <tt>request_id->misc</tt>. This mapping is not used 
+by the core server and has been reserved for the exclusive use of Caudium 
+modules and scripting. The use of <tt>misc</tt> is unregulated, which 
+means that any code that has access to <tt>request_id</tt> can view or 
+alter any data stored within <tt>misc</tt>. When storing data using this 
+method, be certain that the namespace you select is unique in order to 
+avoid accidental corruption of your data. 
+
+<warning>
+Do not store sensitive data within <tt>request_id->misc</tt>.
+</warning>
+
+<h2>Examples</h2>
+The following script can be used to look at the contents of the Request 
+Information object. In order to use it, you must have pike scripts 
+enabled.
+<examplecode caption="dumpid.pike: a script for viewing request_id">
+string parse(object request_id)
+{
+  mapping res=mkmapping(indices(request_id), values(request_id));
+  return sprintf("<pre>%O</pre>", res);
+}
+</examplecode>
+Additionally, the Developer Information module can be used to display 
+similar information at the bottom of served pages.
+<p>
+The second example depicts the use of <tt>request_id</tt>
+<examplecode caption="Storing data in request_id">
+// Let's make a spot for storing an array of data
+//
+// First, we should check to make sure we aren't stomping on
+// existing storage.
+if(!request_id->misc->mystorage)
+  request_id->misc->mystorage=({});
+// Now we can put something in the array for use later in the request.
+request_id->misc->mystorage+=({"banannas", "apples"});
+</examplecode>
+
+
+<h2>References</h2>
+<ol>
+</ol>
