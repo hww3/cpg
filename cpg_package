@@ -1,0 +1,18 @@
+<define container="note">
+<table cellpadding=10 width=100%><tr width=100%><td 
+bgcolor="#dddddd" width=15%><b>NOTE</b></td><td 
+bgcolor="#dddddd"><contents></td></tr></table>
+</define>
+
+<define container="warning">
+<table cellpadding=10 width=100%><tr width=100%><td 
+bgcolor="red" width=15%><b>WARNING</b></td><td 
+bgcolor="#dddddd"><contents></td></tr></table>
+</define>
+<define container="examplecode">
+<table cellpadding=10 width=100%><tr width=100%><td 
+bgcolor="#dddddd" width=15%><b>EXAMPLE</b></td><td 
+bgcolor="#dddddd"><pre><contents></pre></td></tr>
+<tr><td width=15%></td><td><b>Example: &caption;</b></td></tr></table>
+</define>
+<define container="xa"><a href="index.html?page=&href;"><contents></a></define>

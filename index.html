@@ -1,44 +1,18 @@
+<use file="cpg_package">
+<html>
+<head>
 <title>Caudium Programmer's Guide</title>
-<ol>
-<li><a href="introduction.html">Introduction and conventions</a>
-<li><a href="architecture.html">Caudium Internal Architecture</a>
-<li><a href="request_id.html">The Request Information object</a>
-<li><a href="request_id.html">The Configuration object</a>
-<li><a href="caudiumlib.html">Internal convenience functions</a>
-<li>Modules
-a. Types
-MODULE_EXTENSION
-MODULE_LOCATION
-MODULE_URL
-MODULE_FILE_EXTENSION
-MODULE_PARSER
-MODULE_LAST
-MODULE_FIRST
-MODULE_AUTH
-MODULE_MAIN_PARSER
-MODULE_TYPES
-MODULE_DIRECTORIES
-MODULE_PROXY
-MODULE_LOGGER
-MODULE_FILTER
-MODULE_PRECACHE
-MODULE_PROVIDER
-MODULE_PROTOCOL
-MODULE_SECURITY
-MODULE_EXPERIMENTAL
-
-<li>Compound modules ( parser and url, etc)
-
-B,C and D should be discussed for each MODULE_TYPE.
-b. Requirements
-c. Callbacks
-d. Examples 
-<li><a href="wizard.html">Wizards</a>
-<li><a href="pikescripts.html">Scripts</a>
-<li><a href="java.html">Using Java with Caudium</a>
-<li><A href="cgi.html">Using the Common Gateway Interface (CGI)</a>
-<li><a Href="uniscript.html">Universal Scripting (Uniscript)</a>
-<li><A href="cache.html">Using the Caudium Cache</a>
-<li><a href="protocols.html">Protocol modules</a>
-</ol>
-
+<<<<<<< index.html
+</head>
+<body>
+<if variable="page" not>
+<cset variable="page">toc</cset>
+</if>
+<if variable="page is toc" not>
+Caudium Programmer's Guide: <xa href="toc">Table of Contents</xa>
+</if>
+<formoutput quote="#">
+<insert file="#page#.html">
+</formoutput>
+</body>
+</html>

@@ -187,6 +187,14 @@ contains the value of the form variable <i>name</i>.
 Caudium impliments the NCSA CGI/1.1 specification. CGI programs that
 do not employ extensions to this specification should function properly 
 when used with Caudium.
+<p>
+<h3>Environment Variables</h3>
+Certain CGI programs expect certain environment variables be set. These 
+variables may not already be present in the webserver's startup 
+environment. Additional variables may be added by using the Caudium 
+Configuration Interface. This setting is called the "Additional 
+Environment Variables," and is located in the CGI module setting section 
+the for the particular virtual server you are working with.
 
 <h2>Examples</h2>
 

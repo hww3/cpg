@@ -1,0 +1,316 @@
+<h1>Authentication and Naming</h1>
+<h2>Introduction</h2>
+Caudium's authentication and name service architecture has been completely 
+rewritten for the 1.4 release. The existing monolithic user database 
+implimentation has been replaced by a two tier structure of master 
+handler and data providers that also impliments native group handling 
+functions. This chapter is divided into 3 sections: Public 
+Naming and Authentication Methods, which are the well defined APIs that 
+developers may use in their own code; Authentication Database Providers, 
+which provide access to a naming and authentication  data source; and 
+Authentication Method Providers, which provide a method  of retrieving 
+user authentication methods from a user agent (client).
+
+<h2>Public Authentication and Naming API</h2>
+The Master Authentication Handler module provides a consistent interface 
+to the authentication and naming functionality available in Caudium. These 
+functions may be used by modules, applications and scripts on any virtual 
+server that contains a copy of the Master Authentication Handler. By 
+default, this module is added to each virtual server upon its creation. 
+<p>
+
+<h3>Properties</h3>
+The following properties are contained within the Request Information 
+Object (request_id) and are available to any function that receives that 
+object as an argument.
+<dl>
+<dt>mapping|int user
+<dd>This element will contain a mapping that is identical to the result 
+from auth_module->user_info() for any authenticated user. If the remote 
+user has not attempted authentication, or if the attempt failed, this 
+element will be zero (0).</dd>
+
+</dl>
+<note>Previous versions of Caudium made extensive use of the 
+id->auth array. While this element is still available, its use is 
+deprecated. id->auth may be removed from future versions of Caudium.</note> 
+
+<h3>Functions</h3>
+The following functions that make up the API are contained in the 
+Configuration Object (conf). This object is available to all modules, as 
+well as any function that receives the Request Information object as an 
+argument. See the Configuration Object and Request Information chapters 
+for more information about using these objects. Please note that not all 
+virtual servers will have a Master Authentication Handler, so it is 
+prudent to check for its presence before calling these functions.
+<p>
+<dl>
+<dt>int auth_module->authenticate(string u, string p)
+<dd>Attempt to authenticate a user u with password p. Returns 1 on success 
+and 0 (zero) on failure. This result (when the user u exists) is typically 
+cached for a period of time by the authentication handler.
+</dd>
+<dt>int get_uid(string u)
+<dd>Given a username u, find that user's numeric userid. Returns the 
+numeric userid or -1 if the user does not exist.
+</dd>
+<dt>string|int get_username(int uid)
+<dd>Given a numeric userid uid, find that user's username. Returns 
+the string username or 0 if the user does not exist.
+</dd>
+<dt>int get_gid(string g)
+<dd>Given a groupname g, find that group's numeric groupid. Returns the 
+numeric groupid or -1 if the group does not exist.
+</dd>
+<dt>string|int get_groupname(int gid)
+<dd>Given a numeric groupid gid, find that group's groupname. Returns 
+the string groupname or 0 if the group does not exist.
+</dd>
+<dt>mapping|int user_info(string u)
+<dd>Find user information for username u. Returns a mapping containing the 
+user's information or zero if the user does not exist. The mapping 
+contains at least the following elements:
+<table>
+<tr><td>string username</td><td>User Name</td></tr>
+<tr><td>int uid</td><td>User ID</td></tr>
+<tr><td>string name</td><td>Long User Description</td></tr>
+<tr><td>multiset(string) groups</td><td>Group memberships, as multiset of groupname</td></tr>
+<tr><td>string shell</td><td>Login Shell (optional)</td></tr>
+<tr><td>string home_directory</td><td>Home Directory (optional)</td></tr>
+<tr><td>string email</td><td>Email Address (optional)</td></tr>
+</table>
+</dd>
+
+<dt>mapping|int group_info(string g)
+<dd>Find group information for groupname g. Returns a mapping containing 
+the group's information or zero if the group does not exist. The mapping 
+contains at least the following elements:
+<table>
+<tr><td>string groupname</td><td>Group Name</td></tr>
+<tr><td>int gid</td><td>Group ID</td></tr>
+<tr><td>string name</td><td>Long Group Description</td></tr>
+<tr><td>multiset(string) users</td><td>Membership, as multiset of username</td></tr>
+</table>
+</dd>
+<dt>array(string) list_all_users()
+<dd>Return an array of all known users. Returns an array of username, 
+which may be empty if there are no known users or if the underlying user 
+database cannot generate a list of users. This list is typically cached 
+for relatively long periods of time in order to speed response time.
+</dd>
+<dt>array(string) list_all_groups()
+<dd>Return an array of all known groups. Returns an array of groupname, 
+which may be empty if there are no known groups or if the underlying user 
+database cannot generate a list of groups. This list is typically cached 
+for relatively long periods of time in order to speed response time.
+</dd>
+ <dt>
+ </dl>
+<note>Previous versions of Caudium supported several authentication and 
+naming callbacks such as auth() and userinfo(). While these functions are 
+still available, their use is deprecated and may not be present in future 
+releases of Caudium.
+</note>
+
+<h2>Authentication and Naming Database Providers</h2>
+
+An Authentication Database Provider (ADP) provides access to a database of 
+user  and group information to the Master Authentication Handler (MAH) 
+module.  The  Authentication Database Provider is implimented as a module 
+of type MODULE_PROVIDER. This method allows access to multiple user/group 
+databases per virtual server. Additionally,  a virtual server may have 
+multiple instances of a given ADP. Caudium includes ADPs for accessing 
+information stored in System File (/etc), Active Directory, LDAP, SQL and 
+NIS databases.
+<p>
+When a request for user or group  information  is received, the MAH module 
+queries each ADP in turn, until an authoritative match is  found. The 
+order in which the  ADPs are called is controlled by  the module priority 
+of each Authentication Database Provider. 
+<p>
+An ADP should not cache data about database entries, as the Master 
+Authentication  Handler will cache entries for all ADPs. This technique 
+simplifies the  creation of new Authentication Database Providers, and 
+ensures a consistent caching scheme.
+
+<h3>Callback Functions</h3>
+An ADP must impliment the seven user/group related functions described 
+below, in addition to any of the standard MODULE_PROVIDER callback 
+functions. The provider module should identify itself as an 
+"authentication" provider using the query_provides() callback function. 
+The example module at the end of this section describes a minimal ADP 
+which may  be used as a starting point for more complicated authentication 
+providers.
+
+<h4>Authentication</h4>
+<dl>
+<dt>int authenticate(string u, string p)
+<dd>
+Attempt to authenticate a user u with password p. Returns 1 on successful  
+authentication, -1 on authentication failure, or 0  (zero) if the user is 
+not found  or another error has occurred (a result of zero will not be 
+cached by the Master Authentication Handler, so it is appropriate to 
+return zero when an authentication source is unavailable or other 
+transient error has occurred.)
+</dd>
+</dl>
+<h4>User information</h4>
+<dl>
+<dt>mapping|int get_user_info(string u)
+<dd>
+Given a user username, return a mapping describing that user. If 
+the user does not exist, return zero (0). The mapping should contain at 
+least the following elements, additional elements will be passed 
+unchanged to the original calling function:
+<table>
+<tr><td>string username</td><td>User Name</td></tr>
+<tr><td>string name</td><td>Long User Description</td></tr>
+<tr><td>int uid</td><td>Numeric User ID</td></tr>
+<tr><td>int primary_group</td><td>Primary Group ID (optional)</td></tr>
+<tr><td>string email</td>Email Address (optional)<td></td></tr>
+<tr><td>string home_directory</td><td>Home Directory (optional)</td></tr>
+<tr><td>multiset groups</td><td>Group membership, multiset of groupname</td></tr>
+<tr><td>string _source</td><td>result of QUERY("_name")</td></tr>
+</table>
+</dd>
+<dt>string|int get_username(string uid)
+<dd>Given a numeric userid, return a string containing the user name. If 
+the user does not exist, return 0.
+</dd>
+
+<dt>array list_all_users()
+<dd>Return an array of all known usernames. The result of this function is 
+cached, so this function should return a list of usernames unless it is 
+impossible to do so. that is, the length of time required to generate 
+this list should not be considered a reason to not return the user list. 
+If it is not possible to generate a user list, an empty array may be 
+returned instead.
+</dd> 
+</dl> 
+<h4>Group information</h4>
+<dl>
+<dt>string|int get_groupname(string gid)
+<dd>Given a numeric groupid, return a string containing the group name. If 
+the group does not exist, return 0.
+</dd>
+
+<dt>mapping|int get_group_info(string groupname)
+<dd>
+Given a group groupname, return a mapping describing that group. If 
+the group does not exist, return zero (0). The mapping should contain at 
+least the following elements, additional elements will be passed 
+unchanged to the original calling function:
+<table>
+<tr><td>string groupname</td><td>Group Name</td></tr>
+<tr><td>string name</td><td>Long Group Description</td></tr>
+<tr><td>int gid</td><td>Numeric Group ID</td></tr>
+<tr><td>multiset users</td><td>Membership, multiset of username</td></tr>
+<tr><td>string _source</td><td>result of QUERY("_name")</td></tr>
+</table>
+</dd> 
+
+<dt>array list_all_groups()
+<dd>Return an array of all known groupnames. The result of this function 
+is cached, so this function should return a list of groupnames unless it 
+is impossible to do so. that is, the length of time required to generate 
+this list should not be considered a reason to not return the group list. 
+If it is not possible to generate a group list, an empty array may be 
+returned instead.
+</dd> 
+</dl>
+
+<examplecode caption="Sample authentication provider">
+//! we are an provider module
+constant module_type = MODULE_PROVIDER;
+
+//! more than one instance of this module may exist in a virtual server.
+constant module_unique = 0;
+
+//!
+//! we are an authentication database provider.
+//!
+query_provides()
+{
+  return "authentication";
+}
+
+//! @returns 
+//! a mapping containing user information
+//! or 0 if the user doesn't exist.
+//!
+//! username
+//! primary_group
+//! name
+//! uid
+//! home_directory
+//! groups
+//! login_shell (optional)
+//! _source: QUERY("_name")
+mapping|int get_user_info(string u)
+{
+  return (["username": u,
+           "primary_group": 123,
+           "name": "user " + u,
+           "uid": 123,
+           "groups": (<"staff">)
+           "_source": QUERY("_name")
+          ]);
+}
+
+//!  get the user or group name from a numeric user or group id
+//!  
+//!  @returns
+//!  a string containing the entity name or zero if the user or group is 
+//!  not known by this ADP.  
+string|int get_username(string uid)
+{
+  return "bob";
+}
+string|int get_groupname(string gid);
+{
+  return "staff";
+}
+
+//! returns a mapping containing group information
+//! or 0 if the user doesn't exist.
+//!
+//! groupname
+//! name
+//! gid
+//! users
+//! _source query("_name")
+mapping|int get_group_info(string g)
+{
+  return (["groupname": g,
+           "name": "user " + g,
+           "gid": 123,
+           "users": (<"bob">)
+           "_source": QUERY("_name")
+          ]);
+}
+
+//! return an array containing all known user or group names. array may be
+//! empty if there are no known entities or it is not possible to generate
+//! a definitive list of users or groups
+array list_all_users()
+{
+  return ({"bob"});
+}
+array list_all_groups()
+{
+  return ({"staff"});
+}
+
+//!
+//! return 1 on success, -1 on failed authentication
+//!  0 when user is not found, etc.
+int authenticate(string u, string p);
+{
+  if(u!="bob") return 0; // we only know bob.
+  if(p!="bobpass") return -1; // bob's password is bobpass.
+  return 1; // success!
+}
+</examplecode>
+
+<h2>Authentication Method Providers</h2>
+<fixme>Not completed yet</fixme>
