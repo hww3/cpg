@@ -6,7 +6,8 @@ popular option, as well as Pike's support for embedded Java.
 
 <h2>Servlets</h2>
 
-Caudium supports the Servlet 2.x standard. In order to use servlets with 
+Caudium supports the Servlet 2.2 standard, as well as earlier versions of 
+the standard. In order to use servlets with 
 Caudium, the version of Pike that Caudium uses must have Java support 
 enabled. You can verify this by running <tt>bin/caudium --info</tt> and 
 checking for Java in the list of features. The following example depicts a 
@@ -52,8 +53,10 @@ Caudium's Java Servlet support consists of a module that mounts a servlet
 on a particular path in the virtual filesystem, and an internally embedded 
 Java Virtual Machine that talks to caudium via JNI (Java Native
 Invocation). This allows servlets to run quickly within the Caudium
-process, and no external processes are required for servlets to run.
-<p>
+process, and no external processes are required for servlets to run. You 
+may alternately configure the servlet bridge to handle a specific set of 
+file extensions, for example all files that end with <i>.jsp</i><p>
+
 In order to use servlets in a Caudium virtual server, you will add one
 instance of the Java Servlet Bridge module for each servlet you plan to
 run. Each copy will mount a given servlet on a particular path in the
@@ -81,7 +84,7 @@ you use plain class files, you can copy your class file directory
 structure into the Code directory specified in the Java Servlet Bridge's
 configuration settings.
 
-<h2>Java Server Pages</h2>
+<h2>Java Server Pages and other Servlet Containers</h2>
 
 Java Server Pages (JSP) are commonly supported through the use of a 
 servlet. Caudium is known to work well with GNUJSP 1.0.1 and Resin. 
@@ -152,20 +155,23 @@ real paths mounted within the virtual filesystem, so this may
 cause unexpected behavior if there are multiple fileystems on a 
 Caudium virtual server.
 
-<h2>Jakarta Tomcat</h2>
-Tomcat is a freely Java Servlet Container and Java Server Pages 
-application server. Tomcat supports the concept of Connectors, which 
-allow Tomcat to connect to various web servers through a standardized
+<h2>Jakarta Tomcat and Jetty</h2>
+Tomcat and Jetty are freely Java Servlet Container and Java Server Pages 
+application servers. Both Tomcat and Jetty support the concept of 
+Connectors, which 
+allow them to connect to various web servers through a standardized
 communication protocol such as AJPv1.3 (Apache JServ Protocol). Caudium 
 provides an AJP 1.3 connector, called the <i>AJP | Tomcat 4 Connector</i>. 
 <p>
 The <i>AJP | Tomcat 4 Connector</i> is configured similarly to the Resin 
 support module described earlier in this chapter. The module provides 
-similar functionality for users of Tomcat or the Jetty servlet Engine. One 
-current drawback is that the connector does not currently support load 
-balancing across multiple container engines.
-
+similar functionality for users of Tomcat or the Jetty servlet Engine. 
+<note>
+One current drawback is that the connector does not currently support 
+load balancing across multiple container engines.
+</note>
 <p>
+
 <p>
 
 
