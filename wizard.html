@@ -1,4 +1,19 @@
-page_foo
-verify_foo
-wizard_done
-wizard_for
+<title>Wizards</title>
+<h1>Introduction</h1>
+Caudium provides a convenient method for generating user friendly 
+"wizards". Wizards allow a user to step forward and backward through a 
+series of inputs without having to re-enter data. Additionally, the 
+Caudium Wizard implimentation allows each page to be validated, preventing 
+a user from passing a page where information is incorrectly provided.
+<p>
+Caudium Wizards can be created using either RXML, using the Wizard 
+Generator module, or directly in Pike scripts and modules. This chapter 
+discusses using Wizards within Pike. For details on using the Wizard 
+Generator module, please consult the Caudium Web Developers' Guide.
+
+<h1>Using Wizards</h1>
+
+<tt>string page_<i>N</i>()</tt>
+<tt>verify_<i>N</i>()</tt>
+<tt>wizard_done()</tt>
+<tt>wizard_for()</tt>
