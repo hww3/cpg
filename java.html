@@ -1,8 +1,16 @@
 <title>Caudium and Java</title>
 <h1>Using Java with Caudium</h1>
 Caudium supports several methods for working with Java. The primary
-interface is to use Java Servlets, though Java Server Pages are also a 
-popular option, as well as Pike's support for embedded Java.
+interface is to use Java Servlets, though Java Server Pages (JSP) are also
+a  popular option, as well as Pike's support for embedded Java. You may
+also access servlets and JSP through an external container, using a
+connector. Caudium includes connectors for some popular servlet engines. 
+<p>
+A third and considerably more difficult option is to utilize the [largely
+undocumented] Pike interface to Java which allows direct access to java
+methods in Pike through JNI. This third method is not described in this
+chapter, though the servlet module uses this method and may be used as a
+starting point for the intrepid developer.
 
 <h2>Servlets</h2>
 
@@ -167,6 +175,7 @@ The <i>AJP | Tomcat 4 Connector</i> is configured similarly to the Resin
 support module described earlier in this chapter. The module provides 
 similar functionality for users of Tomcat or the Jetty servlet Engine, 
 including post parsing of output and file extension support. 
+<p>
 <note>
 One current drawback is that the connector does not currently support 
 load balancing across multiple container engines.
@@ -185,4 +194,3 @@ href="http://www.caucho.com">http://www.caucho.com</a>
 <li>Jakarta Tomcat website: <a href="http://jakarta.apache.org">http://jakarta.apache.org</a>
 <li><a href="http://jetty.mortbay.com/jetty/doc/modjk.html">Configuring Jetty for AJP</a>
 </ol>
-v
