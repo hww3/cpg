@@ -2,23 +2,26 @@
 <h1>Uniscript: A universal scripting interface</h1>
 
 <h2>Introduction</h2>
+The Universal script parser (Uniscript) allows you to associate a file 
+extension with a scripting engine that will be run when a file is 
+accessed. As an example, you can have all files that end in the extension 
+"php" be run directly through PHP. Previously, this required the use of 
+the Redirect and Path Info modules to rewrite the request so that the PHP 
+CGI would receive the filename (an access to /index.php would be 
+redirected to /cgi-bin/php.cgi/index.php). This technique simplifies 
+configuration and reduces the request overhead required by a redirect. 
+
+Uniscript also ensures that the correct version of a scripting interpreter 
+will be used for all files of a given extension, reducing potential 
+security issues.
+
+
+
 <p>
-Are CGI scripts parsed for RXML? Is data returned from the CGI as it 
-is generated (I think it is)?
 
 <h2>Compatability Notes</h2>
 
-This section should contain notes describing differences between 
-Caudium's behavior and that of other web servers such as Apache.
-<p>
-Caudium is compliant with the NCSA CGI/1.1 specification. CGI programs that
-do not employ extensions to this specification should function properly 
-when used with Caudium.
-
 <h2>Examples</h2>
-
-This section should contain simple examples of CGIs, probably in shell, 
-perl or pike. Perhaps we should mention how to set PHP up as a CGI(?)
 
 <h2>References</h2>
 
