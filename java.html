@@ -1,0 +1,107 @@
+<title>Caudium and Java</title>
+<h1>Using Java with Caudium</title>
+Caudium supports several methods for working with methods for working with 
+Java.
+
+<h2>Servlets</h2>
+
+Caudium supports the Servlet 2.x standard. In order to use servlets with 
+Caudium, the version of Pike that Caudium uses must have Java support 
+enabled. You can verify this by running <tt>bin/caudium --info</tt> and 
+checking for Java in the list of features. The following example depicts a 
+version of Pike with Java support enabled.
+
+<examplecode caption="Checking for Java support">
+user@myhost:/usr/local/caudium/server> bin/caudium --info
+Software......Pike
+Version.......Pike v7.4 release 10
+WWW...........http://pike.ida.liu.se/
+
+pike binary...bin/caudium
+master.pike...: /usr/local/pike/7.4.10/lib/master.pike
+Module path...: /usr/local/pike/7.4.10/lib/modules
+Include path..: /usr/local/pike/7.4.10/lib/include
+Program path..:
+
+Features......dynamic_modules
+              threads
+              out-of-band_data
+              Crypto
+              GL
+              GLUT
+              GTK
+              Gdbm
+              Gmp
+              Gz
+              Image.FreeType
+              Image.GIF
+              Image.JPEG
+              Image.TTF
+              Image.XFace
+              Image.PNG
+              Java
+              Mird
+              Mysql
+              Odbc
+              PDF
+              Yp
+</examplecode>
+
+
+
+<h2>Java Server Pages</h2>
+
+Java Server Pages (JSP) are commonly supported through the use of a 
+servlet. Caudium is known to work with the GNUJSP 1.0.1. 
+<p>
+Download and unpackage the GNUJSP package, copying the jar files from the 
+GNUJSP lib directory to a directory you'll use to store the servlets, such 
+as $CAUDIUM_HOME/local/servlets. Add the paths to these jar files to your 
+CLASSPATH, along with $JAVA_HOME/lib/tools.jar. The example below gives 
+an example. Note that the full path to each jar file must be included in 
+the CLASSPATH statement. After setting the CLASSPATH, Caudium must be 
+shut down and restarted (so that the new CLASSPATH setting takes effect.
+
+<examplecode caption="Sample CLASSPATH for GNUJSP">
+CLASSPATH=${CLASSPATH}:${JAVA_HOME}/lib/tools.jar:\
+/usr/local/caudium/local/servlets/servlet-2.1.jar:\
+/usr/local/caudium/local/servlets/openxml-1.2-w3c.jar:\
+/usr/local/caudium/local/servlets/sax2.jar:\
+/usr/local/caudium/local/servlets/aelfred.jar:\
+/usr/local/caudium/local/servlets/gnujsp10.jar
+export CLASSPATH
+</examplecode>
+
+Create a temporary directory where GNUJSP can save its compiled Java 
+classes, making sure that the user Caudium runs as can write to that 
+directory. Make a note of this directory, as you will substitute this 
+location for the value of the "scratchdir" parameter in the next step.
+<p>
+Add the Java Servlet Bridge module to your virtual server. Set 
+the following parameters to the correct values, as listed below:
+<p>
+<examplecode caption="Java Servlet Module settings for GNUJSP">
+Class Name: org.gjt.jsp.JspServlet 
+Code Directory: ../local/servlets (or the directory where you copied the 
+GNUJSP jar files)
+Servlet location: /jsp/
+Parameters:  debug=false
+             pathdebug=false
+             scratchdir=/var/tmp/
+             usepackages=true
+             keepJava=true
+             compiler=builtin-javac -classpath %classpath%:%scratchdir%:. -d %scratchdir% %source%
+</examplecode>
+<p>
+Save your changes and test the servlet by pointing your browser to /jsp/ 
+on your virtual server. You should get a "JSP File Not Found" error. If 
+not, verify your CLASSPATH and JAVA_HOME environment variables.
+<p>
+Finally, to have jsp files automatically handled by GNUJSP, add the 
+Redirect 3.1 module to your virtual server, adding the following 
+redirect line:
+
+<examplecode caption="Redirect module entry for .jsp files">
+glob *.jsp /jsp/%p
+</examplecode>
+
