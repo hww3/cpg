@@ -1,54 +1,99 @@
-add_pre_state
-parse_rxml
-html_to_unicode
-unicode_to_html
-make_tag
-make_container
-add_config
-extension
-simplify_path
-short_date
-httpdate_to_time
-int2roman
-number2string
-image_from_type
-sizetostring
-html_encode_string
-html_decode_string
-html_encode_tag_value
-get_modname
-get_fullmodname
-roxen_encode
-do_output_tag
-list_colors
-color_name
-parse_color
-rgb_to_hsv
-hsv_to_rgb
-cern_http_date
-http_auth_required
-http_caudium_config_cookie
-http_caudium_id_cookie
-http_date
-http_error_answer
-http_encode_cookie
-http_encode_string
-http_encode_url
-http_file_answer
-http_low_answer
-http_pipe_in_progress
-http_proxy_auth_required
-http_redirect
-http_res_to_string
-http_rxml_answer
-http_stream
-http_string_answer
+<h1>Caudium Programming Functions</h1>
+<h2>Global Functions</h2>
+The following functions are defined in the Caudium module, and are 
+available at all times to pike code running in Caudium.
+<dl>
+<dt>Caudium.cern_http_date()
+<dt>Caudium.extension()
+<dt>Caudium.http_date()
+<dt>Caudium.http_decode()
+<dt>Caudium.http_encode()
+<dt>Caudium.http_encode_cookie()
+<dt>Caudium.http_encode_string()
+<dt>Caudium.http_encode_url()
+<dt>Caudium.get_address()
+<dt>Caudium.get_port()
+<dt>Caudium.parse_headers()
+<dt>Caudium.parse_prestates()
+<dt>Caudium.parse_query_string()
+</dl>
+<h2>Protocol Functions</h2>
+The following functions perform HTTP related tasks and can be accessed 
+by inheriting <tt>http</tt>. Note that <tt>http</tt> is inherited by 
+<tt>caudiumlib</tt>, so it is sufficient to inherit that to gain access 
+to these functions.
+<dl>
+<dt>add_pre_state()  
+<dt>http_caudium_config_cookie()  
+<dt>http_caudium_id_cookie()  
+<dt>http_decode_url()  
+<dt>http_res_to_string()  
+<dt>make_htmldoc_string()
+</dl>
 
-available_fonts
+<h2>HTTP Return Functions</h2>
+The following functions are used to generate specific HTTP result codes,
+and can be accessed  by inheriting <tt>http</tt>. Note that <tt>http</tt> 
+is inherited by  <tt>caudiumlib</tt>, so it is sufficient to inherit that 
+to gain access to these functions.
+<p>
+These functions, often called "http mapping answer functions" (???) return 
+mappings, and may be used in any script or module function that can 
+return this type of mapping.
+<dl>
+<dt>http_auth_required()  
+<dt>http_error_answer()  
+<dt>http_file_answer()  
+<dt>http_htmldoc_answer()  
+<dt>http_low_answer()  
+<dt>http_pipe_in_progress()  
+<dt>http_proxy_auth_required()  
+<dt>http_redirect()  
+<dt>http_rxml_answer()  
+<dt>http_stream()  
+<dt>http_string_answer()  
+</dl>
+<h2>Caudiumlib Functions</h2>
+The following functions perform general server related tasks and can 
+be accessed by inheriting <tt>caudiumlib</tt>. 
+<dl>
+<dt>decode_mode()  
+<dt>do_output_tag()  
+<dt>fix_relative()  
+<dt>get_modfullname()  
+<dt>get_modname()  
+<dt>get_module()  
+<dt>get_scope_var()  
+<dt>get_size()  
+<dt>gif_size()  
+<dt>html_decode_string()  
+<dt>html_encode_tag_value()  
+<dt>html_to_unicode()  
+<dt>httpdate_to_time()  
+<dt>image_from_type()  
+<dt>int2roman()  
+<dt>ipow()  
+<dt>is_modified()  
+<dt>is_safe_string()  
+<dt>make_container()  
+<dt>make_tag()  
+<dt>make_tag_attributes()  
+<dt>msectos()  
+<dt>number2string()  
+<dt>parse_rxml()  
+<dt>parse_scope_var()  
+<dt>parse_scopes()  
+<dt>roxen_encode()  
+<dt>set_scope_var()  
+<dt>short_date()  
+<dt>short_name()  
+<dt>simplify_path()  
+<dt>strip_config()  
+<dt>strip_prestate()  
+<dt>unicode_to_html()  
+<dt>unload_program()
+</dl>
 
-blocking_host_to_ip
-blocking_ip_to_host
-quick_ip_to_host
-quick_host_to_ip
-ip_to_host
-host_to_ip
+<h1>References</h1>
+<a href="http://caudium.net/developer/caudiumref/">Caudium modref 
+Documentation</a>
