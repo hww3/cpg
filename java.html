@@ -158,14 +158,15 @@ Caudium virtual server.
 <h2>Jakarta Tomcat and Jetty</h2>
 Tomcat and Jetty are freely Java Servlet Container and Java Server Pages 
 application servers. Both Tomcat and Jetty support the concept of 
-Connectors, which 
-allow them to connect to various web servers through a standardized
-communication protocol such as AJPv1.3 (Apache JServ Protocol). Caudium 
-provides an AJP 1.3 connector, called the <i>AJP | Tomcat 4 Connector</i>. 
+Connectors, which  allow them to connect to various web servers through a 
+standardized communication protocol such as AJPv1.3 (Apache JServ 
+Protocol). Caudium  provides an AJP 1.3 connector, called the <i>AJP | 
+Tomcat 4 Connector</i>. 
 <p>
 The <i>AJP | Tomcat 4 Connector</i> is configured similarly to the Resin 
 support module described earlier in this chapter. The module provides 
-similar functionality for users of Tomcat or the Jetty servlet Engine. 
+similar functionality for users of Tomcat or the Jetty servlet Engine, 
+including post parsing of output and file extension support. 
 <note>
 One current drawback is that the connector does not currently support 
 load balancing across multiple container engines.
@@ -184,3 +185,4 @@ href="http://www.caucho.com">http://www.caucho.com</a>
 <li>Jakarta Tomcat website: <a href="http://jakarta.apache.org">http://jakarta.apache.org</a>
 <li><a href="http://jetty.mortbay.com/jetty/doc/modjk.html">Configuring Jetty for AJP</a>
 </ol>
+v

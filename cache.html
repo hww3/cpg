@@ -7,12 +7,12 @@ The cache may also be used to store data between requests, such as in
 session handling. The cache is used extensively by various internal functions within 
 caudium, such as the hostname resolver and the supports database handler.
 <p>
-The cache system can be used in pike scripts and server modules, and is 
+The cache engine can be used in pike scripts and server modules, and is 
 also used extensively in the core server. Highly modular in design, the
-cache system supports multiple storage backends, with memory and disk based
-storage currently implimented.
+cache engine supports multiple storage backends, with memory and disk 
+based storage currently implimented.
 <p>
-Most Pike datatypes can be stored in the cache system, with the notable
+Most Pike datatypes can be stored in the cache engine, with the notable
 exception of objects. Because objects can contain code running in the back
 end, such as database connection, it is not possible to cache pike objects
 using the Caudium Cache.
@@ -29,9 +29,10 @@ indexed by an identifying string, and you can only have one cache entry per
 identifier.
 
 <h2>Getting started</h2>
+<h3>Pike Scripts</h3>
 All of the functions you will need to use the cache are stored in "cachelib".
-Simply inherit "cachelib" within your Pike code to gain access to the
-various cache system control functions.
+To use the cache in a pike script, simply inherit "cachelib" within your 
+Pike code to gain access to the various cache engine control functions.
 
 <examplecode caption="Inheriting cachelib">
 inherit "cachelib";
@@ -58,17 +59,6 @@ destroyed when the function you created it in returns.
 to ensure uniqueness within the Caudium instance.
 </dl>
 
-<examplecode caption="Create a new cache for use in a module">
-object cache;
-
-void start()
-{
-  // request a new cache from the cache manager and
-  // pass the module object as part of the request.
-  cache = caudium->cache_manager->get_cache(this_object());
-}
-</examplecode>
-
 <examplecode caption="Create a new cache for use in a script">
 object cache;
 
@@ -77,6 +67,29 @@ string|mapping parse(object id)
    // if we don't have a cache already, create it.
    if(!cache)
      cache=caudium->cache_manager->get_cache(id->conf->query("MyWorldLocation") + "myuniquecachename");
+}
+</examplecode>
+
+<h3>Modules</h3>
+
+The cachelib code is inherited automatically when you inherit "module", so 
+modules automatically gain access to the caching engine. Additionally, two 
+macros are defined in <tt>module.h</tt> that make using the cache in a 
+module simpler. The macros <tt>module_cache</tt> and <tt>mc</tt> are 
+precoded calls to <tt>get_cache</tt> that request a cache for the current 
+object. Because of these macros, you don't have to specifically request a 
+cache, you can just use the identifiers as though they were an already 
+created cache, as in the following example:
+
+<examplecode caption="Create a new cache for use in a module">
+#include <module.h>
+inherit "module";
+
+void start()
+{
+  // request a new cache from the cache manager and
+  // pass the module object as part of the request.
+  mixed cached_data=module_cache->retrieve("key");
 }
 </examplecode>
 
@@ -260,10 +273,73 @@ cache->refresh("recipe-*");
 
 </examplecode>
 
+<h2>Caching behavior</h2>
+
+The cache engine maintains both a Fast (RAM) cache and a Slow Disk (disk 
+or database) cache. The cache manager controls the flow of data 
+between the two caches. The current data migration behavior for the cache 
+engine is described below:
+
+<ol>
+<li>  an object is >= than 25% of the allowed RAM cache size limit
+<li>  an object hasn't expired, but has a low hitrate. This occurs only 
+if:
+  <ol>
+   <li> the Fast cache size limit has been reached or surpassed.
+   <li> the server is being shut down.
+  </ol>
+</ol>
+You can change the behavior of a given cache by using the 
+<tt>behavior()</tt> method. This allows you to turn either the fast 
+(RAM) or slow (Disk) caches off, which may be desirable in some instances.
+<dl>
+<dt>void behavior(void|int(0..2) behavior_type)
+<dd>Enables or disables one of the cache backends. Valid values for 
+<i>behavior_type</i> are: <br>
+  0: set to default.<br>
+  1: turn off slow cache.<br>
+  2: turn off ram cache.
+
+</dl>
+
 <h1>Implementation Notes</h1>
+The data stored in the cache is volatile. Your code must never assume the 
+presence of data stored in the cache, even if its retention period has not 
+yet been exceeded. 
+<p>
 Do not attempt to store pike objects (variables of type object) or other data
 types that contain pike objects (such as a mapping of objects). Unpredictable
-results will occur.
+results can occur.
+<p>
+When working with pike pointer datatype objects such as <tt>mapping</tt>, 
+<tt>multiset</tt> or <tt>array</tt>, note that the object retrieved from 
+cache, if modified, will also modify the object in the cache (for items in 
+the fast cache) even though you might not <tt>store()</tt> those changes. 
+If you need to work with a cached pointer datatype object 
+and not have those changes be reflected in the copy still in the cache, be 
+sure to make an unlinked copy of the object using <tt>copy_value()</tt> 
+first.
+
+<examplecode caption="Making an unlinked copy of an object">
+mixed parse(object id)
+{
+  // m is the original object
+  mapping m=(["oats": 1, "peas": 2, "beans": 3]);
+  // n and m are just pointers to the same object.
+  // changes to either will change both, as they are really the same object.
+  mapping n=m;
+  // o on the other hand is a completely different object, copied from m.
+  // we can do whatever we want to o, and it won't change m or n.
+  mapping o=copy_value(m);
+
+  n->oats=4;
+  o->oats=0;
+
+  // should return output indicating that m and n are identical, but o is 
+  // different.
+  return sprintf("<pre>m: %O\n\nn: %O\n\no: %O\n</pre>", m, n, o);
+}
+</examplecode>
 
 <h2>References</h2>
 <ol>
