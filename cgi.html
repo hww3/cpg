@@ -1,7 +1,9 @@
 <title>CGI</title>
-<h1>CGI: Common Gateway Interface</h1>
+<h1>Common Gateway Interface</h1>
 
-<h2>Introduction</h2>
+<h2>Common Gateway Interface</h2>
+
+<h3>Introduction</h3>
 Caudium supports version 1.1 of the CGI (Common Gateway Interface) 
 specification through the CGI support module. Caudium's behavior may vary
 slightly from that of other web servers; these differences are described 
@@ -29,7 +31,7 @@ be configured to parse the output of a CGI program for RXML markup. This
 option is set in the Configuration Interface.
 <p>
 <p><a name="Environment Variables">
-<h2>Environment Variables</h2>
+<h3>Environment Variables</h3>
 <br>
 When invoking CGI scripts, Caudium passes a number of environment
 variables to the script. These environment variables contain data related to
@@ -183,7 +185,7 @@ contains a list of all form variables.
 contains the value of the form variable <i>name</i>.
 </dl>
 
-<h2>Implimentation Notes</h2>
+<h3>Implimentation Notes</h3>
 Caudium impliments the NCSA CGI/1.1 specification. CGI programs that
 do not employ extensions to this specification should function properly 
 when used with Caudium.
@@ -196,13 +198,51 @@ Configuration Interface. This setting is called the "Additional
 Environment Variables," and is located in the CGI module setting section 
 the for the particular virtual server you are working with.
 
-<h2>Examples</h2>
+<h3>Examples</h3>
 
 This section should contain simple examples of CGIs, probably in shell, 
 perl or pike. Perhaps we should mention how to set PHP up as a CGI(?)
 
+<h2>FastCGI</h2>
+
+FastCGI is a language independent, scalable, open extension to CGI that 
+provides high performance without the limitations of server specific APIs.
+
+<h3>Introduction</h3>
+
+It's a server based fast cgi implementation so that you don't need an 
+external binary. In the old fcgi you have to launch a binary from 
+Process.create_process or something like that. Another interesting point 
+is that the old fast cgi simply doesn't work well and inherit the old 
+cgi module while the new fast cgi inherit new cgi module (so you should 
+have the same env variables defined).
+
+You can find more informations about the differences between server and 
+cgi-fcgi
+binary mode at http://www.fastcgi.com/devkit/doc/fcgi-devel-kit.htm#S4
+
+
+<h2>Uniscript: A universal scripting interface</h2>
+
+<h3>Introduction</h3>
+The Universal script parser (Uniscript) allows you to associate a file 
+extension with a scripting engine that will be run when a file is 
+accessed. As an example, you can have all files that end in the extension 
+"php" be run directly through PHP. Previously, this required the use of 
+the Redirect and Path Info modules to rewrite the request so that the PHP 
+CGI would receive the filename (an access to /index.php would be 
+redirected to /cgi-bin/php.cgi/index.php). This technique simplifies 
+configuration and reduces the request overhead required by a redirect. 
+
+Uniscript also ensures that the correct version of a scripting interpreter 
+will be used for all files of a given extension, reducing potential 
+security issues.
+
 <h2>References</h2>
 
-<a href="http://hoohoo.ncsa.uiuc.edu/cgi/interface.html">CGI/1.1 Specification Webpage</a>
-<p>
-CGI Development Tools (toolkits, perl modules, etc?)
+<ol>
+<li><a href="http://hoohoo.ncsa.uiuc.edu/cgi/interface.html">CGI/1.1 
+Specification Webpage</a>
+<li>CGI Development Tools (toolkits, perl modules, etc?)
+<li><a href="http://www.fastcgi.com">FastCGI Home Page</a>
+</ol>
