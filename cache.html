@@ -1,4 +1,53 @@
 <title>Using the Caudium Cache</title>
+The Caudium Cache [the "cache"] first appeared in Caudium 1.3, and is 
+an optional facility (that is, you are not required to use it) that may 
+be used by a developer to speed server operation and simplify coding. 
+<p>
+The cache system can be used in pike scripts and server modules, and is 
+also used extensively in the core server. Highly modular in design, the
+cache system supports multiple storage backends, with memory and disk based
+storage currently implimented.
+<p>
+Most Pike datatypes can be stored in the cache system, with the notable
+exception of objects. Because objects can contain code running in the back
+end, such as database connection, it is not possible to cache pike objects
+using the Caudium Cache.
+<p>
+The cache is tended to by the cache manager. The cache manager is responsible
+for keeping track of operational caches (there may be many in use at a given
+time), managing storage and expiring caches that have not been used in a
+given amount of time (the "halflife").
+
 <h1>Using the Caudium Cache</h1>
+The cache is available from any pike language object (such as Caudium modules
+or Pike scripts). Entries in the cache are 
+indexed by a identifying string, and you can only have one cache entry per
+identifier.
+
+<h2>Getting started</h2>
+All of the functions you will need to use the cache are stored in "cachelib".
+Simply inherit "cachelib" within your Pike code to gain access to the
+various cache system control functions.
+
+<examplecode caption="Inheriting cachelib">
+inherit "cachelib";
+</examplecode>
+
+Before you can use the cache, you must first request a new cache from 
+the cache manager. Once you create a cache, it will be available until the 
+server is restarted or the cache reaches its halflife.
+<fixme>is this correct?</fixme> 
+
+<h2>Storing Objects</h2>
+<h2>Retreiving Objects</h2>
+<h2>Removing Objects</h2>
+
+<h1>Implimentation Notes</h1>
+Do not attempt to store pike objects (variables of type object) or other data
+types that contain pike objects (such as a mapping of objects). Unpredictable
+results will occur.
 
 <h2>References</h2>
+<ol>
+<li><a href="http://poontang.co.nz/caudiumdoc/cacheprog.html">Programming with Caudium Cache</a>
+</li>
