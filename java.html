@@ -1,7 +1,7 @@
 <title>Caudium and Java</title>
-<h1>Using Java with Caudium</title>
-Caudium supports several methods for working with methods for working with 
-Java.
+<h1>Using Java with Caudium</h1>
+Caudium supports several methods for working with Java. The primary
+interface is to use Java Servlets.
 
 <h2>Servlets</h2>
 
@@ -46,8 +46,38 @@ Features......dynamic_modules
               PDF
               Yp
 </examplecode>
+Caudium's Java Servlet support consists of a module that mounts a servlet
+on a particular path in the virtual filesystem, and an internally embedded 
+Java Virtual Machine that talks to caudium via JNI (Java Native
+Invocation). This allows servlets to run quickly within the Caudium
+process, and no external processes are required for servlets to run.
+<p>
+In order to use servlets in a Caudium virtual server, you will add one
+instance of the Java Servlet Bridge module for each servlet you plan to
+run. Each copy will mount a given servlet on a particular path in the
+virtual server's filesystem. In the configuration interface, this path is
+called the "Servlet location".
+<p>
+There are 3 settings required to connect a servlet to the Java Servlet
+Bridge: the class name, the code directory and the servlet parameters. The
+class name is determined by the servlet you want to run, and might look
+something like net.caudium.servlets.MyServlet. The code directory is the
+directory that Caudium will search in for the servlet's class files. See
+the next section, Making classes available to Caudium, for more
+information about class locations. The third setting, parameters, is used
+to pass settings on to the Servlet. The parameters that are available are
+determined by the servlet being configured. 
+ 
+<h3>Making classes available to Caudium</h3>
 
-
+Java classes are typically distributed in one of two methods: class files
+in a hierarchal directory structure, or packaged in a jar file. Jar files
+are the most popular, as it eases maintenance. However, jar files have a
+drawback when used with Caudium: you must place each jar file that is
+required by an application in your CLASSPATH before starting Caudium. If
+you use plain class files, you can copy your class file directory
+structure into the Code directory specified in the Java Servlet Bridge's
+configuration settings.
 
 <h2>Java Server Pages</h2>
 
