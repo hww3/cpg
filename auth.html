@@ -75,6 +75,7 @@ contains at least the following elements:
 <tr><td>int uid</td><td>User ID</td></tr>
 <tr><td>string name</td><td>Long User Description</td></tr>
 <tr><td>multiset(string) groups</td><td>Group memberships, as multiset of groupname</td></tr>
+<tr><td>string primary_group</td><td>primary group id (optional)</td></tr>
 <tr><td>string shell</td><td>Login Shell (optional)</td></tr>
 <tr><td>string home_directory</td><td>Home Directory (optional)</td></tr>
 <tr><td>string email</td><td>Email Address (optional)</td></tr>
@@ -168,9 +169,10 @@ unchanged to the original calling function:
 <tr><td>int uid</td><td>Numeric User ID</td></tr>
 <tr><td>int primary_group</td><td>Primary Group ID (optional)</td></tr>
 <tr><td>string email</td>Email Address (optional)<td></td></tr>
+<tr><td>string shell</td>Login Shell (optional)<td></td></tr>
 <tr><td>string home_directory</td><td>Home Directory (optional)</td></tr>
 <tr><td>multiset groups</td><td>Group membership, multiset of groupname</td></tr>
-<tr><td>string _source</td><td>result of QUERY("_name")</td></tr>
+<tr><td>string _source</td><td>result of QUERY(_name)</td></tr>
 </table>
 </dd>
 <dt>string|int get_username(string uid)
@@ -205,7 +207,7 @@ unchanged to the original calling function:
 <tr><td>string name</td><td>Long Group Description</td></tr>
 <tr><td>int gid</td><td>Numeric Group ID</td></tr>
 <tr><td>multiset users</td><td>Membership, multiset of username</td></tr>
-<tr><td>string _source</td><td>result of QUERY("_name")</td></tr>
+<tr><td>string _source</td><td>result of QUERY(_name)</td></tr>
 </table>
 </dd> 
 
@@ -245,7 +247,7 @@ query_provides()
 //! home_directory
 //! groups
 //! login_shell (optional)
-//! _source: QUERY("_name")
+//! _source: QUERY(_name)
 mapping|int get_user_info(string u)
 {
   return (["username": u,
@@ -253,7 +255,7 @@ mapping|int get_user_info(string u)
            "name": "user " + u,
            "uid": 123,
            "groups": (<"staff">)
-           "_source": QUERY("_name")
+           "_source": QUERY(_name)
           ]);
 }
 
@@ -278,14 +280,14 @@ string|int get_groupname(string gid);
 //! name
 //! gid
 //! users
-//! _source query("_name")
+//! _source QUERY(_name)
 mapping|int get_group_info(string g)
 {
   return (["groupname": g,
            "name": "user " + g,
            "gid": 123,
            "users": (<"bob">)
-           "_source": QUERY("_name")
+           "_source": QUERY(_name)
           ]);
 }
 
