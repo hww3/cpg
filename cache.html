@@ -4,7 +4,8 @@ The Caudium Cache [the "cache"] first appeared in Caudium 1.3, and is
 an optional facility (that is, you are not required to use it.) The
 primary purpose of the cache to speed server operation and simplify coding. 
 The cache may also be used to store data between requests, such as in
-session handling.
+session handling. The cache is used extensively by various internal functions within 
+caudium, such as the hostname resolver and the supports database handler.
 <p>
 The cache system can be used in pike scripts and server modules, and is 
 also used extensively in the core server. Highly modular in design, the
@@ -24,7 +25,7 @@ given amount of time (the "halflife").
 <h1>Using the Caudium Cache</h1>
 The cache is available from any pike language object (such as Caudium modules
 or Pike scripts). Entries in the cache are 
-indexed by a identifying string, and you can only have one cache entry per
+indexed by an identifying string, and you can only have one cache entry per
 identifier.
 
 <h2>Getting started</h2>
@@ -41,11 +42,225 @@ the cache manager. Once you create a cache, it will be available until the
 server is restarted or the cache reaches its halflife.
 <fixme>is this correct?</fixme> 
 
-<h2>Storing Objects</h2>
-<h2>Retreiving Objects</h2>
-<h2>Removing Objects</h2>
+To request a new cache, use the function <tt>get_cache</tt> located in <tt>caudium-&gt;cache_manager</tt>. It takes one
+ argument, a unique name for the cache or, if you are using the cache from within a module, the module itself. It is 
+important to choose a name that will be unique across potentially many instances of your code on multiple virtual 
+servers. In order to help prevent the possibility of two caches with the same name, you can use the 
+configuration variable <tt>MyWorldLocation</tt> as part of the cache identifier.
+<p>
+Additionally, you will most likely want to be sure that the object you create is present across multiple requests.
+Creating a global <fixme>is that what we call them in pike?</fixme> variable will ensure that the cache will not be
+destroyed when the function you created it in returns.
 
-<h1>Implimentation Notes</h1>
+<dl>
+<dt><tt>object caudium-&gt;cache_manager-&gt;get_cache(string|object name)</tt>
+<dd>Creates a new cache object with the name name. If used in a module, the module may be passed as the module name 
+to ensure uniqueness within the Caudium instance.
+</dl>
+
+<examplecode caption="Create a new cache for use in a module">
+object cache;
+
+void start()
+{
+  // request a new cache from the cache manager and
+  // pass the module object as part of the request.
+  cache = caudium->cache_manager->get_cache(this_object());
+}
+</examplecode>
+
+<examplecode caption="Create a new cache for use in a script">
+object cache;
+
+string|mapping parse(object id)
+{
+   // if we don't have a cache already, create it.
+   if(!cache)
+     cache=caudium->cache_manager->get_cache(id->conf->query("MyWorldLocation") + "myuniquecachename");
+}
+</examplecode>
+
+<h2>Storing Objects</h2>
+You may store most any type of data in a Caudium Cache, with a few exceptions. See the implimentation notes section 
+later in this chapter for more details.
+<p>
+The function that is used to store data in the cache is called <tt>store()</tt>. It takes one argument, a mapping that contains
+the object you wish to store along with some parameters describing how the that object is to be treated by the
+cache manager. In order to make storing objects simpler, there are a few functions from <tt>cachelib</tt> that will create
+the mapping we send to <tt>store()</tt>.
+<dl>
+<dt><tt>int store(mapping objdesc)</tt>
+<dd>Store an object in the cache. The argument is a mapping containing the object and a set of control elements.
+</dl>
+
+<p>
+<h3>Helper functions</h3>
+As we have learned earlier, the cache's <tt>store()</tt> function takes a mapping as its argument. Obviously, creating a
+mapping with the correct elements each time we want to store an object in the cache would quickly become tedious and
+time consuming. In order to help ease the task of creating these mappings, <tt>cachelib</tt> gives us some handy helper 
+functions that will provide mappings that can be passed directly to <tt>store()</tt>.
+<p>
+Each of these functions take the following three arguments:
+<dl>
+<dt><tt>mixed o</tt>
+<dd>This is the actual object you want to store.
+<dt><tt>string name</tt>
+<dd>The key that you will use later to retrieve the object from the cache. Keep in mind that the <tt>name</tt>
+must be unique within a cache. Storing two objects with the same name will result in the first object being overwritten.
+<dt><tt>void|int expire</tt>
+<dd>The time the object should expire and be removed from the cache. This argument may be specified in one of three methods. 
+First, you may provide a specific time in unix timestamp format, such as that provided by the Pike <tt>time()</tt> function.
+Second, you may specify a number of seconds the object should be valid for. After <tt>expire</tt> seconds, the object will
+be purged. Third, you may specify a value of <tt>-1</tt> to indicate the object should be stored indefinitely, until manually
+removed from the cache. If not specified, the object will be set to expire 5 minutes into the future.
+</dl>
+<p>
+<dl>
+<dt><tt>mapping cache_file(args ...)</tt>
+<dd>Use this function when you want to store a file, or more specifically an open <tt>Stdio.File</tt> object. The 
+contents of which are read into the cache, and written into a new <tt>Stdio.File</tt> object upon retrieval.
+<p>
+<dt><tt>mapping cache_pike(args ...)</tt>
+<dd>You are storing a standard pike datatype, such as a multiset, array, int or mapping.
+<p>
+<dt><tt>mapping cache_program(args ...)</tt> 
+<dd>This is a slightly more specific handler for Pike bytecode, that is, Pike code that has been compiled
+but not yet made into an object (instantiated).
+<p>
+<dt><tt>mapping cache_string(args ...)</tt>
+<dd>This is a handler for storing Pike <tt>string</tt> objects.
+<p>
+<dt><tt>mapping cache_image(args ...)</tt>
+<dd>This handler should be used to store images or more specifically, Pike <tt>Image.Image</tt> objects.
+</dl>
+
+<examplecode caption="Storing an object in the cache">
+// we assume that the cache has already been created as described in previous examples
+// and that we have inherited cachelib into our code.
+
+// here's a bit of data to store in our cache.
+// doesn't this sound delicious?
+mapping objtostore=(["myname": "Tuna Noodle Casserole",
+  "ingredients": ({"tuna", "noodles", "a casserole dish")
+  ]);
+
+// prepare the object to be stored under the name "recipe-tunanoodle"
+// and we'll keep it for 10 minutes (600 seconds).
+mapping objdef=cache_pike(objtostore, "recipe-tunanoodle", 600);
+
+// finally, let's store the object in our cache.
+cache->store(objdef);
+</examplecode>
+
+<h2>Retrieving Objects</h2>
+The function used for retrieving objects from the cache is <tt>retrieve()</tt>. Retrieve can function in one of two
+ways. First, it can be used to check for the presence of the requested object in the cache, and if present, return it.
+While simpler, this method is considerably more limited because it requires the data that would be retrieved already
+be present in the cache. This method is useful in situations where there are "one-shot" entries placed in the cache 
+as part of a separate part of the code and may not necessarily exist.
+<p>
+The second, and slightly more complicated technique, is to provide a function and arguments to <tt>retrieve()</tt> that
+can be used to generate the desired object, store it in the cache, and return it back to retrieve. This method is useful
+in situations when the object is desired, regardless of whether it was in the cache to begin with.
+<dl>
+<dt><tt>mixed retrieve(string name, function|void get_callback, array|void callback_args)</tt>
+<dd>Retrieve an object stored as <tt>name</tt> from the cache. If not present, and <tt>get_callback</tt> and 
+<tt>calback_args</tt> are provided, call <tt>get_callback</tt> with arguments <tt>callback_args</tt>. <tt>get_callback</tt>
+should store the desired object in the cache, then return the object.
+</dl>
+
+<examplecode caption="Simple object retrieval">
+mixed parse(object id)
+{
+// we assume that the cache has already been created as described in previous examples
+// and that we have inherited cachelib into our code.
+
+int timeout=3600;
+int o;
+
+if(!id->variables->username)
+  return "You must provide a username.";
+else if(!o=cache->retrieve(id->variables->username))
+  {
+  // an entry for username isn't in the cache, so we know they haven't been here in
+  // timeout seconds. we'll put their name in the cache so they don't get through
+  // again for timeout more seconds.
+  cache->store(cache_pike(time(), id->variables->username, timeout));
+  return "New 'round these parts, are you, " + id->variables->username + "?";
+  }
+else
+  {
+  return "You were already here at " + ctime(o) + ", " + id->variables->username + ". Come back later.";
+  }
+}
+</examplecode>
+
+<examplecode caption="Cache retrieval with automatic object generation and storage">
+
+mixed parse(object id)
+{
+// we assume that the cache has already been created as described in previous examples
+// and that we have inherited cachelib into our code.
+
+int timeout=3600;
+int o;
+
+if(!id->variables->username)
+  return "You must provide a username.";
+else 
+  {
+  // if the object isn't already in the cache, store the object in the cache and give it back to us.
+  o=cache->retrieve(id->variables->username, add_to_cache, id->variables->username))
+  return "Hi, " + id->variables->username + ", you first showed up at " + ctime(o) + ".";
+  }
+}
+
+int add_to_cache(string name)
+{
+  timeout=-1;
+  int t=time();
+
+  cache->store(cache_pike(name, t, timeout));
+  return t;
+}
+
+</examplecode>
+
+<h2>Removing Objects</h2>
+Normally, manually removing objects from a cache is not necessary, as the cache manager will remove any object that has 
+passed its expiration time. However, there are situations when it is useful or necessary to remove all or some objects 
+from a cache. Each cache provides two functions for accomplishing this:
+
+<dl>
+<dt><tt>int refresh(string name)</tt>
+<dd>This function will remove one object at a time. It takes one argument: a string containing the name of the object to 
+remove from the cache.
+<dt><tt>int flush(void|string regex)</tt>
+<dd>This function can be used to remove multiple objects at a time, up to and including a complete flush of all 
+objects in the cache. This function takes an optional argument: a string containing a regular expression describing the
+names of objects to be removed from the cache. All objects matching the regular expression will be removed from the cache. 
+If not provided, the entire cache will be flushed.
+</dl> 
+
+<examplecode caption="Removing an object from the cache">
+// we assume that the cache has already been created as described in previous examples
+// and that we have inherited cachelib into our code.
+
+// let's remove a specific recipe we added before.
+cache->refresh("recipe-tunanoodle");
+
+</examplecode>
+
+<examplecode caption="Removing multiple objects from the cache">
+// we assume that the cache has already been created as described in previous examples
+// and that we have inherited cachelib into our code.
+
+// let's remove all entries whose key starts with "recipe-".
+cache->refresh("recipe-*");
+
+</examplecode>
+
+<h1>Implementation Notes</h1>
 Do not attempt to store pike objects (variables of type object) or other data
 types that contain pike objects (such as a mapping of objects). Unpredictable
 results will occur.
