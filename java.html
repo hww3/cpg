@@ -1,7 +1,8 @@
 <title>Caudium and Java</title>
 <h1>Using Java with Caudium</h1>
 Caudium supports several methods for working with Java. The primary
-interface is to use Java Servlets.
+interface is to use Java Servlets, though Java Server Pages are also a 
+popular option, as well as Pike's support for embedded Java.
 
 <h2>Servlets</h2>
 
@@ -46,6 +47,7 @@ Features......dynamic_modules
               PDF
               Yp
 </examplecode>
+
 Caudium's Java Servlet support consists of a module that mounts a servlet
 on a particular path in the virtual filesystem, and an internally embedded 
 Java Virtual Machine that talks to caudium via JNI (Java Native
@@ -82,25 +84,15 @@ configuration settings.
 <h2>Java Server Pages</h2>
 
 Java Server Pages (JSP) are commonly supported through the use of a 
-servlet. Caudium is known to work with the GNUJSP 1.0.1. 
+servlet. Caudium is known to work well with GNUJSP 1.0.1 and Resin. 
+<p>
+<h3>GNUJSP</h3>
+GNUJSP is a freely available Java Server Pages 1.0 compliant servlet. This 
+section describes the configuration of GNUJSP with Caudium.
 <p>
 Download and unpackage the GNUJSP package, copying the jar files from the 
 GNUJSP lib directory to a directory you'll use to store the servlets, such 
-as $CAUDIUM_HOME/local/servlets. Add the paths to these jar files to your 
-CLASSPATH, along with $JAVA_HOME/lib/tools.jar. The example below gives 
-an example. Note that the full path to each jar file must be included in 
-the CLASSPATH statement. After setting the CLASSPATH, Caudium must be 
-shut down and restarted (so that the new CLASSPATH setting takes effect.
-
-<examplecode caption="Sample CLASSPATH for GNUJSP">
-CLASSPATH=${CLASSPATH}:${JAVA_HOME}/lib/tools.jar:\
-/usr/local/caudium/local/servlets/servlet-2.1.jar:\
-/usr/local/caudium/local/servlets/openxml-1.2-w3c.jar:\
-/usr/local/caudium/local/servlets/sax2.jar:\
-/usr/local/caudium/local/servlets/aelfred.jar:\
-/usr/local/caudium/local/servlets/gnujsp10.jar
-export CLASSPATH
-</examplecode>
+as $CAUDIUM_HOME/local/servlets. 
 
 Create a temporary directory where GNUJSP can save its compiled Java 
 classes, making sure that the user Caudium runs as can write to that 
@@ -111,25 +103,75 @@ Add the Java Servlet Bridge module to your virtual server. Set
 the following parameters to the correct values, as listed below:
 <p>
 <examplecode caption="Java Servlet Module settings for GNUJSP">
-Class Name: org.gjt.jsp.JspServlet 
-Code Directory: ../local/servlets (or the directory where you copied the 
-GNUJSP jar files)
+File extension servlet : Yes
+Parameters : 4 lines
+Parse RXML in servlet output : No
+Servlet extensions : jsp
+Class name : org.gjt.jsp.JspServlet
+Class path : /usr/lib/java2/lib/tools.jar, 
+             ../local/servlets/aelfred.jar, ../local/servlets/gnujsp10.jar, 
+             ../local/servlets/sax2.jar, ../local/servlets/servlet-2.1.jar, 
+             ../local/servlets/openxml-1.2-w3c.jar
 Servlet location: /jsp/
 Parameters:  scratchdir=/var/tmp/
              usepackages=true
              keepJava=true
-             compiler=builtin-javac -classpath %classpath%:%scratchdir%:. -d %scratchdir% %source%
-</examplecode>
+             compiler=builtin-javac -classpath /usr/lib/java2/lib/tools.jar:../local/servlets/servlet-2.1.jar:%classpath%:%scratchdir%:. 
+-d %scratchdir% %source% </examplecode>
 <p>
-Save your changes and test the servlet by pointing your browser to /jsp/ 
-on your virtual server. You should get a "JSP File Not Found" error. If 
-not, verify your CLASSPATH and JAVA_HOME environment variables.
+Save your changes and test the servlet by copying the file 
+<tt>examples/hello.jsp</tt> from the GNUJSP distribution to a convenient 
+location in your virtual server's filesystem. Point your browser to this 
+file, and verify that the page is properly displayed.
+If you get Java compiler errors, verify your CLASSPATH and JAVA_HOME 
+environment variables, along with the <tt>-classpath</tt> option in the 
+compiler parameter in the Configuration Interface.
 <p>
-Finally, to have jsp files automatically handled by GNUJSP, add the 
-Redirect 3.1 module to your virtual server, adding the following 
-redirect line:
 
-<examplecode caption="Redirect module entry for .jsp files">
-glob *.jsp /jsp/%p
-</examplecode>
+<h3>Resin</h3>
+Resin is a Java application server that supports the Servlet 2.3 and Java 
+Server Pages 1.2 specifications. Resin runs as a standalone process that 
+Caudium communicates with via a socket. The <i>mod_caucho for Caudium</i> 
+connects Caudium with the Resin application server using the Resin srun 
+protocol.
+<p>
+To enable support for Resin, add the <i>mod_caucho for Caudium</i> module 
+to the desired virtual server. mod_caucho has 3 settings: the srun host, 
+port and extensions that should be forwarded to the srun server. 
+By default, Resin's srun interface listens on localhost port 6802. Unless 
+resin has been configured differently, these default settings should not 
+need to be changed.
 
+Resin also needs to be configured to use the same  document root as 
+Caudium. Resin does not support the concept of multiple  disjoint 
+real paths mounted within the virtual filesystem, so this may 
+cause unexpected behavior if there are multiple fileystems on a 
+Caudium virtual server.
+
+<note>
+Currently, mod_caucho for Caudium does not support load balancing across 
+multiple Resin instances.
+</note>
+
+<h2>Jakarta Tomcat</h2>
+Tomcat is a freely Java Servlet Container and Java Server Pages 
+application server. Tomcat supports the concept of Connectors, which 
+allow Tomcat to connect to various web servers through a standardized
+communication protocol such as AJPv1.3 (Apache JServ Protocol). Caudium 
+does not currently support AJP, however the protocol specifications are 
+available at:
+<p>
+<a href="http://jakarta.apache.org/tomcat/tomcat-4.1-doc/jk2/common/AJPv13.html">http://jakarta.apache.org/tomcat/tomcat-4.1-doc/jk2/common/AJPv13.html</a>
+<br>
+<a 
+href="http://jakarta.apache.org/tomcat/tomcat-4.1-doc/jk2/common/AJPv13-extensions-proposal.html">http://jakarta.apache.org/tomcat/tomcat-4.1-doc/jk2/common/AJPv13-extensions-proposal.html</a>
+<p>
+
+
+<h2>References</h2>
+<ol>
+<li>GNUJSP website: <a 
+href="http://klomp.org/gnujsp">http://klomp.org/gnujsp</a>
+<li>Caucho Resin website: <a 
+href="http://www.caucho.com">http://www.caucho.com</a>
+</ol>
