@@ -210,16 +210,34 @@ provides high performance without the limitations of server specific APIs.
 
 <h3>Introduction</h3>
 
-It's a server based fast cgi implementation so that you don't need an 
-external binary. In the old fcgi you have to launch a binary from 
-Process.create_process or something like that. Another interesting point 
-is that the old fast cgi simply doesn't work well and inherit the old 
-cgi module while the new fast cgi inherit new cgi module (so you should 
-have the same env variables defined).
+Caudium 1.4 and higher provide new enhanced server based support for 
+FastCGI applications. Previous versions of Caudium used the cgi-fcgi 
+bridge. The newer version has several very nice features:
 
+<ul>
+<li>Communication is slower than with a Web server that avoids the 
+fork/exec overhead on every FastCGI request. 
+<li>cgi-fcgi does not perform application management, so you need to 
+provide this yourself. 
+<li>cgi-fcgi supports only the Responder role. 
+</ul>
+
+Another interesting point  is that the old-fast cgi simply doesn't work 
+well and inherits the old  cgi support module while the new fast-cgi 
+support inherits the newer cgi module (so you should have the same env 
+variables defined). 
+
+<note>
+The previous 
+support modules are deprecated and aren't available for use unless 
+specifically moved into the module search path from their resting location 
+in <tt>server/deprecated</tt>.
+</note>
+<p>
 You can find more informations about the differences between server and 
-cgi-fcgi
-binary mode at http://www.fastcgi.com/devkit/doc/fcgi-devel-kit.htm#S4
+cgi-fcgi binary mode at 
+http://www.fastcgi.com/devkit/doc/fcgi-devel-kit.htm#S4
+
 
 
 <h2>Uniscript: A universal scripting interface</h2>
